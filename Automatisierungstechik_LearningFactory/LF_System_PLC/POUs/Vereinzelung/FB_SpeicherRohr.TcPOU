@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_SpeicherRohr" Id="{d80c85b9-1200-4f94-8ca2-3eef21bc32bb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SpeicherRohr
+VAR_INPUT
+	bFlascheBefullen : BOOL; // Flasche soll in Speicher gelegt werden
+	bFlascheAuswurf : BOOL; // Flasche soll in Kammer fallen
+	bKammer : Bool;
+END_VAR
+VAR_OUTPUT
+	bAuswurf : BOOL; // Flasche wurde ausgeworfen
+	aSpeicher : ARRAY[0..3] OF BOOL := [TRUE,TRUE,TRUE,FALSE];
+END_VAR
+VAR
+	rTrigBefullen : R_Trig;
+	rTrigAuswurf : R_Trig;
+	i : INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[rTrigBefullen(CLK := bFlascheBefullen);
+rTrigAuswurf(CLK := bFlascheAuswurf);
+
+// Flaschenspeicher befüllen
+IF rTrigBefullen.q AND NOT aSpeicher[3] THEN
+	FOR i := 0 TO 3 DO
+		IF NOT aSpeicher[i] THEN
+			aSpeicher[i] := TRUE;
+			EXIT;
+		END_IF
+	END_FOR
+ELSIF rTrigBefullen.Q AND NOT aSpeicher[0] AND bFlascheAuswurf AND NOT bKammer THEN
+	aSpeicher[0] := FALSE; 
+	aSpeicher[1] := FALSE;
+	aSpeicher[2] := FALSE;
+	aSpeicher[3] := FALSE;
+	bAuswurf := TRUE;
+END_IF
+
+IF rTrigAuswurf.q AND aSpeicher[0] THEN
+	FOR i := 3 TO 0 BY -1 DO
+		IF aSpeicher[i] THEN
+			aSpeicher[i] := FALSE;
+			EXIT;
+		END_IF
+	END_FOR
+	bAuswurf := TRUE;
+ELSE
+	bAuswurf := FALSE; // Keine Flasche in Speicher
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

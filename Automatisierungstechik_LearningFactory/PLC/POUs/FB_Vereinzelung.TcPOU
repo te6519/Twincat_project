@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Vereinzelung" Id="{e5d927ac-81b5-4dd3-aaf0-78f88781dd83}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Vereinzelung
+VAR_INPUT
+	//Sensoreingänge
+	bSens1 : BOOL;
+	bSens2 : BOOL;
+	bSens3 : BOOL;
+	//Steuereingaenge
+	bEnable : BOOL;
+	bExecute : BOOL;
+END_VAR
+VAR_OUTPUT
+	bGate1 : BOOL;
+	bGate2 : BOOL;
+	eStatus : EAnlagenStatus;
+	nDoneCounter : INT;
+END_VAR
+VAR
+	timer : TON;
+	bTimerIn : BOOL; (* starts timer with rising edge, resets timer with falling edge *) 
+    GateTime : TIME := T#1S; (* time to pass, before Q is set *)
+	
+	Q  : BOOL; (* is TRUE, GateTime seconds after IN had a rising edge *)
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+// Sicherheits-Reset 
+IF NOT bEnable THEN
+    eStatus := EAnlagenStatus.OFF;
+	bGate1 := FALSE;
+	bGate2 := FALSE;
+	
+END_IF
+
+CASE eStatus OF
+    EAnlagenStatus.OFF: // Off
+		//die gates false zu setzen kann man weglassen, da sie am anfang des programmes eh auf false gesetzt werden
+        IF bEnable AND bSens2 THEN
+            eStatus := EAnlagenStatus.StateInitOpen;
+        END_IF
+
+    EAnlagenStatus.StateInitOpen: // Init-State-Open
+        bGate1 := TRUE;
+		bGate2 := FALSE;
+		
+        IF bSens1 THEN
+            eStatus := EAnlagenStatus.StateInitClose;
+        END_IF
+
+    EAnlagenStatus.StateInitClose: // Init-State-Close
+        
+		bTimerIn := TRUE;
+        IF timer.Q THEN 
+                eStatus := EAnlagenStatus.StateReady;
+				bTimerIn := FALSE;
+				timer(IN := FALSE); // DEN TIMER-BAUSTEIN SOFORT RESETTEN
+				bGate1 := FALSE;        
+		END_IF
+		
+
+    EAnlagenStatus.StateReady: // Bott in Chamber
+        IF bExecute THEN
+            eStatus := EAnlagenStatus.StateProductionOpen;
+        END_IF
+
+    EAnlagenStatus.StateProductionOpen: // Prod.-Open
+        bGate2 := TRUE;
+		
+        IF bSens3 THEN
+            eStatus := EAnlagenStatus.StateProductionClose;
+        END_IF
+
+    EAnlagenStatus.StateProductionClose: // Prod.-Close
+		bTimerIn := TRUE;
+        IF timer.Q THEN
+                eStatus := EAnlagenStatus.StateDone;
+				bTimerIn := FALSE;
+				timer(IN := FALSE); // AUCH HIER EXPLIZIT RESETTEN
+				bGate2 := FALSE;
+		END_IF
+		
+    EAnlagenStatus.StateDone: // Bottel separated
+	nDoneCounter := nDoneCounter + 1;
+        IF NOT bExecute THEN
+            eStatus := EAnlagenStatus.StateInitOpen;
+        END_IF
+
+END_CASE
+
+timer(IN:= bTimerIn, PT := Gatetime);
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="Temp_Model0" Id="{1fc7e20c-e79e-4aed-9e94-0bad34a1f3bd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK Temp_Model0
+VAR_INPUT
+	ssMethodType: SINT := 0;
+	iVolt_U: UINT;
+END_VAR
+VAR_OUTPUT
+	iTemp1_Y: UINT;
+	iTemp2_Y: UINT;
+END_VAR
+VAR
+	rtb_Gain1: LREAL;
+	rtb_Add1: LREAL;
+	i: DINT;
+	rtb_DiscreteTransferFcn: LREAL;
+	DiscreteTransferFcn_states: LREAL;
+	b_counter: DINT;
+	counter_b: DINT;
+	Delay_DSTATE: ARRAY[0..2279] OF LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+CASE ssMethodType OF
+    SS_INITIALIZE: 
+        (* SystemInitialize for Atomic SubSystem: '<Root>/Temp_Model' *)
+        (* InitializeConditions for Sin: '<S1>/Sine Wave' *)
+        b_counter := 0;
+        (* End of SystemInitialize for SubSystem: '<Root>/Temp_Model' *)
+        (* SystemInitialize for Atomic SubSystem: '<Root>/Temp_Model' *)
+        (* InitializeConditions for Delay: '<S1>/Delay' *)
+
+        FOR i := 0 TO 2279 DO 
+            Delay_DSTATE[i] := 0.0;
+        END_FOR;
+
+        (* End of InitializeConditions for Delay: '<S1>/Delay' *)
+        
+
+        (* InitializeConditions for Sin: '<S1>/Sine Wave1' *)
+        counter_b := 0;
+        (* InitializeConditions for DiscreteTransferFcn: '<S1>/Discrete Transfer Fcn' *)
+        DiscreteTransferFcn_states := 0.0;
+        (* End of SystemInitialize for SubSystem: '<Root>/Temp_Model' *)
+    SS_STEP: 
+        (* Outputs for Atomic SubSystem: '<Root>/Temp_Model' *)
+        (* Sum: '<S1>/Add1' incorporates:
+         *  Constant: '<S1>/T_umg1'
+         *  Delay: '<S1>/Delay'
+         *  Sin: '<S1>/Sine Wave'
+         *  Sum: '<S1>/Sum5' *)
+        rtb_Add1 := (SIN(((DINT_TO_LREAL(b_counter) * 2.0) * 3.1415926535897931) / 100.0) * 0.3) + (Delay_DSTATE[0] + 25.0);
+        (* Sum: '<S1>/Add' incorporates:
+         *  Constant: '<S1>/T_umg1'
+         *  Delay: '<S1>/Delay'
+         *  Sin: '<S1>/Sine Wave1'
+         *  Sum: '<S1>/Sum5' *)
+        rtb_Gain1 := (SIN(((DINT_TO_LREAL(counter_b) * 2.0) * 3.1415926535897931) / 100.0 + 1.57) * 0.2) + (Delay_DSTATE[0] + 25.0);
+        (* DiscreteTransferFcn: '<S1>/Discrete Transfer Fcn' incorporates:
+         *  DataTypeConversion: '<S1>/Data Type Conversion'
+         *  Gain: '<S1>/D//A-Wandler EL4002' *)
+        rtb_DiscreteTransferFcn := (0.00015259254737998596 * UINT_TO_LREAL(iVolt_U)) - (-0.99996221812467 * DiscreteTransferFcn_states);
+        (* Update for Sin: '<S1>/Sine Wave' *)
+        b_counter := b_counter + 1;
+
+        IF b_counter = 1000 THEN 
+            b_counter := 0;
+        END_IF;
+
+        (* End of Update for Sin: '<S1>/Sine Wave' *)
+        
+
+        (* Update for Delay: '<S1>/Delay' incorporates:
+         *  DiscreteTransferFcn: '<S1>/Discrete Transfer Fcn' *)
+
+        FOR i := 0 TO 2278 DO 
+            Delay_DSTATE[i] := Delay_DSTATE[i + 1];
+        END_FOR;
+
+        Delay_DSTATE[2279] := (0.000408383380313031 * rtb_DiscreteTransferFcn) + (0.000769303707329493 * DiscreteTransferFcn_states);
+        (* End of Update for Delay: '<S1>/Delay' *)
+        
+
+        (* Update for Sin: '<S1>/Sine Wave1' *)
+        counter_b := counter_b + 1;
+
+        IF counter_b = 1000 THEN 
+            counter_b := 0;
+        END_IF;
+
+        (* End of Update for Sin: '<S1>/Sine Wave1' *)
+        
+
+        (* Update for DiscreteTransferFcn: '<S1>/Discrete Transfer Fcn' *)
+        DiscreteTransferFcn_states := rtb_DiscreteTransferFcn;
+        (* Outport: '<Root>/iTemp1_Y' incorporates:
+         *  DataTypeConversion: '<S1>/Data Type Conversion1'
+         *  Gain: '<S1>/Gain' *)
+        iTemp1_Y := DINT_TO_UINT(TRUNC(100.0 * rtb_Add1));
+        (* Outport: '<Root>/iTemp2_Y' incorporates:
+         *  DataTypeConversion: '<S1>/Data Type Conversion2'
+         *  Gain: '<S1>/Gain1' *)
+        iTemp2_Y := DINT_TO_UINT(TRUNC(100.0 * rtb_Gain1));
+        (* End of Outputs for SubSystem: '<Root>/Temp_Model' *)
+END_CASE;
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="Temp_Model0">
+      <LineId Id="3" Count="85" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

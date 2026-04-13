@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_System_Vereinzelung" Id="{34c88f13-f18d-47ca-891c-8b821c1626b9}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_System_Vereinzelung
+VAR_INPUT
+	bS1L1 : BOOL; // + Öffnen - Schließen
+	bS1L2 : BOOL; // + Schließen - Öffnen
+	bS2L1 : BOOL; // + Öffnen - Schließen
+	bS2L2 : BOOL; // + Schließen - Öffnen
+END_VAR
+VAR_OUTPUT
+	bNS1 : BOOL; // Flasche am Kopf
+	bNS2 : BOOL; // Flasche im Speicher
+	bNS3 : BOOL; // Flasche in Kammer
+	bBottleDropped : BOOL;
+END_VAR
+VAR
+	bS1open : BOOL;
+	bS2open : BOOL;
+	TimerS1 : Ton; // Schleusenbewegung (Schleuse1)
+	TimerS2 : Ton; // Schleusenbewegung (Schleuse2)
+	fbSpeicherRohr : FB_SpeicherRohr;
+	nCaseS1 : UINT := 0;
+	nCaseS2 : UINT := 0;
+	bBefullen : BOOL;
+	S1pos : INT;
+	S2pos : INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[TimerS1(PT := T#0.3S);
+TimerS2(PT := T#0.3S);
+fbSpeicherRohr(bFlascheBefullen:= bBefullen, bFlascheAuswurf := bS1open, bKammer := bNS3, bAuswurf => , aSpeicher => );
+
+// Sensor in Speicher
+bNS2 := fbSpeicherRohr.aSpeicher[0];
+// Sensor in Kammer
+IF fbSpeicherRohr.bAuswurf AND NOT bS2open THEN
+	bNS3 := TRUE;
+ELSIF bS2Open THEN
+	bNS3 := FALSE;
+END_IF
+
+CASE nCaseS1 OF // Zustand S1
+	0: // Schleuse geschlossen
+	bS1open := FALSE;
+	IF bS1L1 AND NOT bS1L2 THEN
+		nCaseS1 := 1; // obere Schleuse öffnen
+	END_IF
+//------------------------------------------------	
+	1: // obere Schleuse öffnen
+	TimerS1.IN := TRUE;
+	IF NOT bS1open THEN
+		S1pos := S1pos - 1;
+	END_IF
+	IF TimerS1.Q THEN
+		bS1open := TRUE;
+	END_IF
+	IF NOT bS1L1 AND bS1L2 THEN
+		nCaseS1 := 2; // obere Schleuse schließen
+		TimerS1.IN := FALSE;
+	END_IF
+//------------------------------------------------
+	2: //obere Schleuse schließen
+	TimerS1.IN := TRUE;
+	IF bS1open THEN
+		S1pos := S1pos + 1;
+	END_IF
+	IF timerS1.Q THEN
+		bS1open := FALSE;
+	END_IF
+	IF bS1L1 AND NOT bS1L2 THEN
+		nCaseS1 := 1; // obere Schleuse schließen
+		TimerS1.IN := FALSE;
+	END_IF
+END_CASE
+
+CASE nCaseS2 OF // Zustand S2
+	0: // Schleuse geschlossen
+	bS2open := FALSE;
+	IF bS2L1 AND NOT bS2L2 THEN
+		nCaseS2 := 1; // obere Schleuse öffnen
+	END_IF
+//------------------------------------------------	
+	1: // untere Schleuse öffnen
+	TimerS2.IN := TRUE;
+	IF NOT bS2open THEN
+		S2pos := S2pos - 1;
+	END_IF
+	IF TimerS2.Q THEN
+		bS2open := TRUE;
+	END_IF
+	IF bS2open AND bNS3 THEN
+		bBottleDropped := TRUE;
+	END_IF
+	IF NOT bS2L1 AND bS2L2 THEN
+		nCaseS2 := 2; // untere Schleuse schließen
+		TimerS2.IN := FALSE;
+	END_IF
+//------------------------------------------------
+	2: //untere Schleuse schließen
+	TimerS2.IN := TRUE;
+	IF bS2open THEN
+		S2pos := S2pos + 1;
+	END_IF
+	IF timerS2.Q THEN
+		bS2open := FALSE;
+		bBottleDropped := FALSE;
+	END_IF
+	IF bS2L1 AND NOT bS2L2 THEN
+		nCaseS2 := 1; // untere Schleuse schließen
+		TimerS2.IN := FALSE;
+	END_IF
+END_CASE
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

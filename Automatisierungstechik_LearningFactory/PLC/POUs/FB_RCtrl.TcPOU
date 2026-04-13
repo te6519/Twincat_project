@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_RCtrl" Id="{93003f5e-1516-4c4a-9788-9a915aa1f303}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_RCtrl
+VAR_INPUT
+	bGate1 : BOOL;
+	bGate2 : BOOL;
+	
+END_VAR
+VAR_OUTPUT
+	bGate1Auf : BOOL;
+	bGate1Zu : BOOL;
+	bGate2Auf : BOOL;
+	bGate2Zu : BOOL;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF bGate1 THEN
+	bGate1Auf := TRUE;
+	bGate1Zu := FALSE;
+	bGate2Auf := FALSE;
+	bGate2Zu := TRUE;
+
+ELSIF bGate2 THEN
+	bGate1Auf := FALSE;
+	bGate1Zu := TRUE;
+	bGate2Auf := TRUE;
+	bGate2Zu := FALSE;
+
+ELSIF NOT bGate1 THEN
+	bGate1Auf := FALSE;
+	bGate1Zu := TRUE;
+
+ELSIF NOT bGate2 THEN
+	bGate2Auf := FALSE;
+	bGate2Zu := TRUE;
+	
+END_IF
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

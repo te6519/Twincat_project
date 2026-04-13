@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_System_CNV" Id="{9767be57-9546-4c24-ab3e-14483c109a9e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_System_CNV
+VAR_INPUT
+	fPos : LREAL;
+	bStopper1 : BOOL;
+	bStopper2 : BOOL;
+	bStopper3 : BOOL;
+	bBottleDropped : BOOL; 
+END_VAR
+VAR_OUTPUT
+	bNS1 : BOOL;
+	bNS2 : BOOL;
+	bNS3 : BOOL;
+	bNS4 : BOOL;
+	bBottleLeft : Bool;
+END_VAR
+VAR
+	fBottlePos : LREAL; // Reale Position der Flasche
+	iBottlePos : LREAL; // Visualisierungs Position der Flaschen
+	bBottleMoving : BOOL; // Flasche kann sich Bewegen, kein Stopper geschlossen und Stopper Pos erreicht
+	fOffPos : LREAL; // OffsetPos nach Bewegungsfreigabe durch Stopper rückzug...
+	rTrigBottleMoving : R_Trig;
+	rTrigBottleDropped : R_Trig;
+	fStopperPos1 : LREAL := 125.0;
+	fStopperPos2 : LREAL := 250.0;
+	fStopperPos3 : LREAL := 375.0;
+	fStopperPos4 : LREAL := 630.0;; // Ende des Förderbandes
+	onTimerCNVClear : TON;
+	bBottleOnCNV : BOOL;
+	bCNVisMoving : BOOL;
+	fPosAlt : LReal;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[onTimerCNVClear(PT := T#1S);
+rTrigBottleMoving(CLK := bBottleMoving);
+rTrigBottleDropped(CLK := bBottleDropped);
+IF rTrigBottleDropped.Q THEN
+	bBottleOnCNV := TRUE;
+END_IF
+// Flaschen Position bestimmen
+IF rTrigBottleMoving.Q OR rTrigBottleDropped.Q THEN
+	fOffPos := fPos-fBottlePos;
+END_IF
+IF bBottleMoving AND bBottleOnCNV THEN
+	fBottlePos := fPos-fOffPos;
+END_IF
+// Skalierungsfunktion für fBottlePos zu iBottlePos (Real zu Visualisierung)
+
+iBottlePos := TO_INT(fBottlePos * 0.7);
+
+// Bewegungsfreigabe
+IF NOT bStopper1 AND fBottlePos > fStopperPos1 - 2.0 AND fBottlePos < fStopperPos1 + 2.0 THEN
+	bBottleMoving := FALSE;
+ELSIF NOT bStopper2 AND fBottlePos > fStopperPos2 - 2.0 AND fbottlePos < fStopperPos2 + 2.0 THEN
+	bBottleMoving := FALSE;
+ELSIF NOT bStopper3 AND fBottlePos > fStopperPos3 - 2.0 AND fBottlePos < fStopperPos3 + 2.0 THEN
+	bBottleMoving := FALSE;
+ELSIF fBottlePos > fStopperPos4 - 1.0 THEN
+	bBottleMoving := FALSE;
+ELSE
+	bBottleMoving := TRUE;
+END_IF
+// Sensor aktivierung
+// bNS1
+IF fBottlePos > fStopperPos1 - 15.0 AND fBottlePos < fStopperPos1 + 5.0 THEN
+	bNS1 := TRUE;
+ELSE
+	bNS1 := FALSE;
+END_IF
+//bNS2
+IF fBottlePos > fStopperPos2 - 15.0 AND fBottlePos < fStopperPos2 + 5.0 THEN
+	bNS2 := TRUE;
+ELSE
+	bNS2 := FALSE;
+END_IF
+//bNS3
+IF fBottlePos > fStopperPos3 - 15.0 AND fBottlePos < fStopperPos3 + 5.0 THEN
+	bNS3 := TRUE;
+ELSE
+	bNS3 := FALSE;
+END_IF
+//bNS4
+IF fBottlePos > fStopperPos4 - 15.0 AND fBottlePos < fStopperPos4 + 5.0 THEN
+	bNS4 := TRUE;
+ELSE
+	bNS4 := FALSE;
+END_IF
+
+// END of CNV, Clear after 1 sec.
+bBottleLeft := False;
+IF bNS4 THEN
+	onTimerCNVClear.IN := TRUE;
+	IF onTimerCNVClear.Q THEN
+		fBottlePos := 0.0;
+		onTimerCNVClear.IN := FALSE;
+		bBottleOnCNV := FALSE;
+		bBottleLeft := TRUE;
+	END_IF
+END_IF
+
+// is CNV Moving?
+IF fPosAlt < fPos THEN
+	bCNVisMoving := TRUE;
+ELSE
+	bCNVisMoving := FALSE;
+END_IF
+fPosAlt := fPos;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

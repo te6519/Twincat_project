@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Blinklicht" Id="{47ac5380-c0d8-43aa-b22e-02c92b23cc6f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Blinklicht
+VAR_INPUT
+	eStatus : EAnlagenStatus;
+	//bEnable : BOOL; //für stop status
+	
+END_VAR
+VAR_OUTPUT
+	bRed : BOOL;
+	bGreen : BOOL;
+	bYellow : BOOL;
+	
+END_VAR
+VAR
+	bblinkEnable : BOOL := FALSE;
+	bblinkNow : BOOL := FALSE;
+	
+	bblinkRED : BOOL := FALSE;
+	bblinkGreen : BOOL := FALSE;
+	bblinkYellow : BOOL := FALSE;
+	
+	fbTON : TON;
+	fbTP : TP;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[bblinkEnable := FALSE;
+bblinkNow := FALSE;
+	
+bblinkRED := FALSE;
+bblinkGreen := FALSE;
+bblinkYellow := FALSE;
+
+bRed    := FALSE;
+bGreen  := FALSE;
+bYellow := FALSE;
+
+CASE eStatus OF
+	EAnlagenStatus.OFF:
+		bRed := TRUE;
+		bblinkEnable := FALSE;
+		
+	EAnlagenStatus.StateInitOpen, EAnlagenStatus.StateInitClose:	//Init
+		bblinkEnable := TRUE;
+		bblinkGreen := TRUE;
+		bblinkRed := FALSE;
+		bblinkYellow := FALSE;
+		
+	EAnlagenStatus.StateProductionOpen, EAnlagenStatus.StateProductionClose: //Production
+		bblinkEnable := FALSE;
+		bGreen := TRUE;
+		
+	EAnlagenStatus.StateReady: //Ready
+		bblinkEnable := TRUE;
+		bblinkGreen := TRUE;
+		bblinkyellow := TRUE;
+	
+	EAnlagenStatus.StateDone: //Done
+		bblinkEnable := FALSE;
+		bGreen := TRUE;
+		bYellow := TRUE;
+	
+	
+END_CASE
+
+fbTON(IN:=bblinkEnable AND NOT fbTon.Q , PT:= T#1S , Q=> , ET=> );
+fbTP(IN:= fbTon.Q, PT:= T#500MS , Q=> , ET=> );
+
+bblinkNow := fbTP.Q;
+
+IF bblinkEnable THEN
+		
+	IF bblinkRed THEN
+		bRed := bblinkNow;	
+	END_IF
+	
+	IF bblinkGreen THEN
+		bGreen := bblinkNow;
+	END_IF
+	
+	IF bblinkYellow THEN
+		bYellow := bblinkNow;
+	END_IF
+END_IF
+
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="MAIN" Id="{b69336c1-8a9b-421f-9584-90893724dc31}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+// Systemeingangssignale (Stellsignale für Aktoren)
+	bEnable AT%Q* : BOOL;
+	bExecute AT%Q* : BOOL;
+	// Status Lampe
+	bIn_LedRot 		AT%I* : BOOL;
+	bIn_LedYellow 	AT%I* : BOOL;
+	bIn_LedGreen 	AT%I* : BOOL;
+	// Vereinzelung 
+	bIn_Schleuse1_L1 AT%I* : BOOL; // + Öffnen - Schließen
+	bIn_Schleuse1_L2 AT%I* : BOOL; // + Schließen - Öffnen
+	bIn_Schleuse2_L1 AT%I* : BOOL; // + Öffnen - Schließen
+	bIn_Schleuse2_L2 AT%I* : BOOL; // + Schließen - Öffnen
+	// Förderband
+	fIN_CnvPos AT%I* : LREAL;
+	bIN_Stopper1 AT%I* : BOOL;
+	bIN_Stopper2 AT%I* : BOOL;
+	bIN_Stopper3 AT%I* : BOOL;
+	// Extruder
+	fIN_ExtPos1 AT%I* : LREAL;
+	fIN_ExtPos2 AT%I* : LREAL;
+	fIN_ExtPos3 AT%I* : LREAL;
+	
+// Systemausgangssignale (Sensorsignale)
+	//Vereinzelung
+	bOut_VereinzelungNS1 AT%Q* : BOOL; // Flasche am Kopf
+	bOut_VereinzelungNS2 AT%Q* : BOOL; // Flasche im Speicher
+	bOut_VereinzelungNS3 AT%Q* : BOOL; // Flasche in Kammer
+	//Förderband
+	bOUT_CnvNS1 AT%Q* : BOOL;
+	bOUT_CnvNS2 AT%Q* : BOOL;
+	bOUT_CnvNS3 AT%Q* : BOOL;
+	bOUT_CnvNS4 AT%Q* : BOOL;
+	// Füllstandssensoren
+	iOut_USS1 AT%Q* : UINT;
+	iOut_USS2 AT%Q* : UINT;
+	iOut_USS3 AT%Q* : UINT;
+	
+// System FB
+	fbVereinzelung : FB_System_Vereinzelung;	
+	fbCNV : FB_System_CNV;
+	fbExt1 : FB_System_Fullstand;
+	fbExt2 : FB_System_Fullstand;
+	fbExt3 : FB_System_Fullstand;
+	fbBottleLevel : FB_System_FlaschenFullstand;
+	
+// Hilfsvariablen
+	bRefill1 : BOOL;
+	bRefill2 : BOOL;
+	bRefill3 : BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbVereinzelung(
+	bS1L1:= bIn_Schleuse1_L1, 
+	bS1L2:= bIn_Schleuse1_L2, 
+	bS2L1:= bIn_Schleuse2_L1, 
+	bS2L2:= bIn_Schleuse2_L2,
+	bNS1=> bOut_VereinzelungNS1, 
+	bNS2=> bOut_VereinzelungNS2, 
+	bNS3=> bOut_VereinzelungNS3,
+	bBottleDropped => );
+	
+fbCNV(
+	fPos:= fIN_CnvPos, 
+	bStopper1:= bIN_Stopper1, 
+	bStopper2:= bIN_Stopper2, 
+	bStopper3:= bIN_Stopper3, 
+	bBottleDropped := fbVereinzelung.bBottleDropped , 
+	bNS1=> bOut_CnvNS1 , 
+	bNS2=> bOut_CnvNS2 , 
+	bNS3=> bOut_CnvNS3 , 
+	bNS4=> bOut_CnvNS4,
+	bBottleLeft => );
+	
+fbExt1(bRefill:=bRefill1 , fPosExt:= fIN_ExtPos1, iOut=> iOut_USS1 );
+fbExt2(bRefill:=bRefill2 , fPosExt:= fIN_ExtPos2, iOut=> iOut_USS2 );
+fbExt3(bRefill:=bRefill3 , fPosExt:= fIN_ExtPos3, iOut=> iOut_USS3 );
+
+fbBottleLevel(rFilling1 := fIN_ExtPos1, rFilling2 := fIN_ExtPos2 ,rFilling3 := fIN_ExtPos3,Reset:= fbCNV.bBottleDropped );]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

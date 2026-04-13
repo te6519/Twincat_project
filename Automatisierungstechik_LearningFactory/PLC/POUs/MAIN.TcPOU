@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="MAIN" Id="{fbf1a3a5-cfd5-4f76-a7c8-2f213ff033ea}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	bRed : BOOL;
+	bGreen : BOOL;
+	bYellow : BOOL;
+	
+	// FB_Vereinzelung_In:
+	bSens1 : BOOL;
+	bSens2 : BOOL;
+	bSens3 : BOOL;
+	bEnable : BOOL;
+	bExecute : BOOL;
+	
+	// FB_Vereinzelung_OUT:
+	bGate1 : BOOL;
+	bGate2 : BOOL;
+	
+	fbVereinzelung : FB_Vereinzelung;
+	fbRctrl : fb_RCtrl;	
+	fbBlink : FB_Blinklicht;
+	
+
+	eStatus : EAnlagenStatus;
+	nDoneCounter : INT;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+fbVereinzelung(
+	bSens1 := IFC_HW.bEinzelSens1,
+	bSens2 := IFC_HW.bEinzelSens2,
+	bSens3 := IFC_HW.bEinzelSens3,
+	bEnable := IFC_HW.bEnable,
+	bExecute := IFC_HW.bExecute,
+	bGate1 => bGate1,
+	bGate2 => bGate2,
+	eStatus => eStatus,
+	nDoneCounter => nDoneCounter);
+	
+bGate1 := fbVereinzelung.bGate1;
+bGate2 := fbVereinzelung.bGate2;
+
+fbRctrl(
+	bGate1 := bGate1,
+	bGate2 := bGate2,
+	bGate1Auf=> IFC_HW.bR1AKT1, 
+	bGate1Zu=> IFC_HW.bR2AKT1, 
+	bGate2Auf=> IFC_HW.bR1AKT2, 
+	bGate2Zu=> IFC_HW.bR2AKT2);
+
+fbBlink(eStatus:= eStatus, bRed=> IFC_HW.bAmpelRot, bGreen=> IFC_HW.bAmpelGrun, bYellow=> IFC_HW.bAmpelGelb);
+
+(*
+//OUT
+IFC_HW.bAmpelRot := bRed;
+IFC_HW.bAmpelGrun := bGreen;
+IFC_HW.bAmpelGelb := bYellow;
+
+IFC_HW.bR1AKT1 := bGate1Auf; //Schleuse oben öffnen
+IFC_HW.bR2AKT1 := bGate1Zu;
+IFC_HW.bR1AKT2 := bGate2Auf;
+IFC_HW.bR2AKT2 := bGate2Zu;
+
+//IN
+bSens1 := IFC_HW.bEinzelSens1;
+bSens2 := IFC_HW.bEinzelSens1;
+bSens3 := IFC_HW.bEinzelSens3;
+
+bEnable := IFC_HW.bEnable;
+bExecute := IFC_HW.bExecute;
+*)
+
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

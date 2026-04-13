@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_System_FlaschenFullstand" Id="{3f169650-9450-4f49-9029-c43269054316}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_System_FlaschenFullstand
+VAR_INPUT
+	rFilling1 : LREAL;
+	rFilling2 : LREAL;
+	rFilling3 : LREAL;
+	Reset : BOOL;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	rPcntFillLevel : REAL;
+	rFilling1Alt : REAL;
+	rFilling2Alt : REAL;
+	rFilling3Alt : REAL;
+	iFillLevel1 : UINT;
+	iFillLevel2 : UINT;
+	iFillLevel3 : UINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF Reset THEN
+	rPcntFillLevel := 0.0;
+	iFillLevel1 := 0;
+	iFillLevel2 := 0;
+	iFillLevel3 := 0;
+END_IF
+
+IF rFilling1 <> rFilling1Alt THEN 
+	rPcntFillLevel := rPcntFillLevel + (rFilling1 - rFilling1Alt)/360*7;
+	iFillLevel1 := TO_UINT(rPcntFillLevel * 0.25);
+ELSIF rFilling2 <> rFilling2Alt THEN
+	rPcntFillLevel := rPcntFillLevel + (rFilling2 - rFilling2Alt)/360*7;
+	iFillLevel2 := TO_UINT(rPcntFillLevel * 0.25)-iFillLevel1;
+ELSIF rFilling3 <> rFilling3Alt THEN
+	rPcntFillLevel := rPcntFillLevel + (rFilling3 - rFilling3Alt)/360*7;
+	iFillLevel3 := TO_UINT(rPcntFillLevel * 0.25)- iFillLevel2-iFillLevel1;
+END_IF
+
+rFilling1Alt := rFilling1;
+rFilling2Alt := rFilling2;
+rFilling3Alt := rFilling3;
+
+IF rPcntFillLevel > 100 THEN
+	rPcntFillLevel := 100.0;
+END_IF
+
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

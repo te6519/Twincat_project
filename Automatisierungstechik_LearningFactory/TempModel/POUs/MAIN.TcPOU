@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="MAIN" Id="{73325dd8-e90f-4efc-b2df-427ecaf831ca}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+iVolt 		AT%I* : UINT;
+iTempSens1 	AT%Q* : UINT;
+iTempSens2 	AT%Q* : UINT;
+fbTempModel : Temp_Model0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+fbTempModel(ssMethodType:= , iVolt_U:= iVolt , iTemp1_Y=> iTempSens1 , iTemp2_Y=> iTempSens2 );
+fbTempModel.ssMethodType := 1;]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="8" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

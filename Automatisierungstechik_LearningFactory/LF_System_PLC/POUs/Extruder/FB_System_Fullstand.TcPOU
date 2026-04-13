@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_System_Fullstand" Id="{961d6cf8-3a96-4b5c-9d59-296a8dbef8ad}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_System_Fullstand
+VAR_INPUT
+	bRefill : BOOL;
+	fPosExt : LREAL;
+END_VAR
+VAR_OUTPUT
+	iOut : UINT; // Fullstandssignal
+END_VAR
+VAR
+	rPcntFillLevel : REAL := 50; // Fullstand in Prozent
+	iFillLevel : UINT;
+	fPosExtAlt : LREAL;
+	NotMoving : Bool;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+// Auffüllen
+IF bRefill THEN
+	rPcntFillLevel := 100.0;
+END_IF
+// Füllstandsänderung durch Extruderbewegung
+IF NOT notMoving THEN
+	rPcntFillLevel := rPcntFillLevel - (fPosExt-fPosExtAlt)/360*0.5; // Füllstand - Grad/Umdrehung * 0,5% pro Umdrehung
+END_IF
+
+IF rPcntFillLevel < 0.0 THEN
+	rPcntFillLevel := 0.0;
+END_IF
+
+iFillLevel := TO_UINT(rPcntFillLevel*1.7);
+
+IF fPosExtAlt = fPosExt THEN
+	NotMoving := TRUE;
+ELSE
+	NotMoving := FALSE;
+END_IF
+
+fPosExtAlt := fPosExt;
+
+iOut := to_UINT(-65536/100 * rPcntFillLevel + 65536);]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_CNV" Id="{85a3c084-5822-445d-88cd-b30dbd71fba2}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CNV
+VAR_INPUT
+	bEnable : BOOL;
+	bExecute : BOOL;
+	bHalt : BOOL;
+	rVel : REAL;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	nState : INT :=0;
+	mcPower : MC_Power;
+	mcReset : MC_Reset;
+	mcVelocity : MC_MoveVelocity;
+	mcHalt : MC_Halt;
+	ErrorID: INT;
+END_VAR
+
+VAR_IN_OUT 
+	ax : Axis_Ref;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[mcHalt(
+	Axis:= ax, 
+	Execute:= , 
+	Deceleration:= , 
+	Jerk:= , 
+	BufferMode:= , 
+	Options:= , 
+	Done=> , 
+	Busy=> , 
+	Active=> , 
+	CommandAborted=> , 
+	Error=> , 
+	ErrorID=> );
+	
+mcPower(
+	Axis:= ax, 
+	Enable:= , 
+	Enable_Positive:= , 
+	Enable_Negative:= , 
+	Override:= , 
+	BufferMode:= , 
+	Options:= , 
+	Status=> , 
+	Busy=> , 
+	Error=> , 
+	ErrorID=> );
+	
+mcReset(
+	Axis:= ax, 
+	Execute:= , 
+	Done=> , 
+	Busy=> , 
+	Error=> , 
+	ErrorID=> );
+	
+mcVelocity(
+	Axis:= ax, 
+	Execute:= , 
+	Velocity:= rVel, 
+	Acceleration:= , 
+	Deceleration:= , 
+	Jerk:= , 
+	Direction:= , 
+	BufferMode:= , 
+	Options:= , 
+	InVelocity=> , 
+	Busy=> , 
+	Active=> , 
+	CommandAborted=> , 
+	Error=> , 
+	ErrorID=> );
+
+ax.ReadStatus();
+
+IF ax.Status.Error THEN 
+	nState := 99;
+ELSIF NOT bEnable THEN 
+	nState := 0;
+END_IF
+
+CASE nState OF
+	0: // OFF
+	
+		mcReset.Execute := FALSE;
+		mcPower.Enable := FALSE;
+		mcPower.Enable_Positive := FALSE;
+		mcVelocity.Execute := FALSE;
+		mcHalt.Execute := FALSE;
+		
+		
+		IF ax.Status.Error THEN 
+			nState := 99;
+		ELSIF bEnable THEN 
+			nState := 1;
+		END_IF
+	
+	1: //INIT
+		
+		mcPower.Enable := TRUE;
+		mcPower.Enable_Positive := FALSE;
+		mcReset.Execute := FALSE;
+		mcVelocity.Execute := FALSE;
+		mcHalt.Execute := FALSE;
+	
+		IF mcPower.Status THEN 
+			nState :=2;
+		END_IF
+		
+	2: //Ready
+		mcPower.Enable := TRUE;
+		mcPower.Enable_Positive := FALSE;
+		mcReset.Execute := FALSE;
+		mcVelocity.Execute := FALSE;
+		mcHalt.Execute := FALSE;
+		
+		IF bExecute THEN 
+			nState :=3;
+		END_IF
+	
+	3:// CNV an
+		mcPower.Enable := TRUE;
+		mcPower.Enable_Positive := TRUE;
+		mcReset.Execute := FALSE;
+		mcVelocity.Execute := TRUE;
+		mcHalt.Execute := FALSE;
+		
+		IF bHalt THEN 
+			nState :=4;
+		END_IF
+	
+	4: // CNV aus
+		mcPower.Enable := TRUE;
+		mcPower.Enable_Positive := TRUE;
+		mcReset.Execute := FALSE;
+		mcVelocity.Execute := FALSE;
+		mcHalt.Execute := TRUE;
+		
+		IF mcHalt.Done THEN 
+			nState :=5;
+		END_IF
+	
+	5: // DONE
+		mcPower.Enable := TRUE;
+		mcPower.Enable_Positive := TRUE;
+		mcReset.Execute := FALSE;
+		mcVelocity.Execute := FALSE;
+		mcHalt.Execute := FALSE;
+		
+		IF NOT bExecute AND NOT bHalt THEN 
+			nState :=2;
+		END_IF
+	
+	99: // ERROR 
+		mcPower.Enable := FALSE;
+		mcPower.Enable_Positive := FALSE;
+		mcReset.Execute := FALSE;
+		mcVelocity.Execute := FALSE;
+		mcHalt.Execute := FALSE;
+		
+		IF bEnable THEN 
+			nState :=100;
+		END_IF
+	
+	100: // Resolve
+		mcPower.Enable := TRUE;
+		mcPower.Enable_Positive := TRUE;
+		mcReset.Execute := FALSE;
+		mcVelocity.Execute := FALSE;
+		mcHalt.Execute := FALSE;
+	
+	IF mcReset.Done THEN 
+			nState :=1;
+		END_IF
+END_CASE]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

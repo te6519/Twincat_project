@@ -21,6 +21,7 @@ VAR
 	fbVereinzelung : FB_Vereinzelung;
 	fbRctrl : fb_RCtrl;	
 	fbBlink : FB_Blinklicht;
+	fbCNV : FB_CNV;
 	
 
 	eStatus : EAnlagenStatus;
@@ -29,7 +30,14 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
+      <ST><![CDATA[fbCNV(
+	bEnable:= ifc_hw.bEnable, 
+	bExecute:= ifc_hw.bExecute, 
+	bHalt:= ifc_hw.bBandSens1, 
+	rVel:= 50, 
+	ax:= ifc_hw.ax_BandMotor);
+	
+	
 fbVereinzelung(
 	bSens1 := IFC_HW.bEinzelSens1,
 	bSens2 := IFC_HW.bEinzelSens2,

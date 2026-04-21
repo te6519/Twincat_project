@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="F_SensStationMonitor" Id="{eded965a-bff3-423e-bbac-078144acfbeb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_SensStationMonitor : BOOL
+VAR_INPUT
+	bSens1 : BOOL;
+	bSens2 : BOOL;
+	bSens3 : BOOL;
+	
+	nStation : INT;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[F_SensStationMonitor := FALSE;
+
+IF bSens1 AND nStation = 1 THEN
+	F_SensStationMonitor := TRUE;	
+	RETURN;
+
+ELSIF bSens2 AND nStation = 2 THEN
+	F_SensStationMonitor := TRUE;
+	RETURN;
+	
+ELSIF bSens3 AND nStation = 3 THEN
+	F_SensStationMonitor := TRUE;
+	RETURN;
+	
+ELSE
+	F_SensStationMonitor := FALSE;
+	RETURN;
+	
+END_IF
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -18,10 +18,16 @@
     <LibraryReferences>{c088a732-8f40-443a-8263-1c643723cb4c}</LibraryReferences>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DUTs\EAnlageGes.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\EAnlagenStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\EFoerderband.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\ETransport.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GVLs\IFC_HW.TcGVL">
@@ -30,25 +36,44 @@
     <Compile Include="PlcTask.TcTTO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\FB_Blinklicht.TcPOU">
+    <Compile Include="POUs\FB_Abfuellmodul.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\FB_CNV.TcPOU">
+    <Compile Include="POUs\FB_DigitalInput.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\FB_RCtrl.TcPOU">
+    <Compile Include="POUs\FB_Dispenser.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\FB_Vereinzelung.TcPOU">
+    <Compile Include="POUs\HardwareEbene\FB_StatusLight.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HardwareEbene\FB_CNV.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HardwareEbene\FB_RCtrl.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\HardwareEbene\FB_Transport.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\MAIN.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\F_SensStationMonitor.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\ProzessEbene\FB_Vereinzelung.TcPOU">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DUTs" />
     <Folder Include="GVLs" />
+    <Folder Include="POUs\MaschinenEbene" />
+    <Folder Include="POUs\HardwareEbene" />
+    <Folder Include="POUs\ModulEbene" />
+    <Folder Include="POUs\ProzessEbene" />
     <Folder Include="VISUs" />
     <Folder Include="POUs" />
   </ItemGroup>

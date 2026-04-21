@@ -1,20 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="EFoerderband" Id="{febd0df0-1fd4-4009-9c68-79c2893b4396}">
+  <DUT Name="EAnlageGes" Id="{2a9a092b-f052-4d7d-93c4-4128ddd84c5c}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
 {attribute 'to_string'}
 TYPE EFoerderband :
 (
 	Off:=0,
-	init := 1,
-	ErrorState := 99,
-	Resolve := 100,
+	Init := 1,
 	Ready := 2,
-	CNV_on := 3,
-	CNV_aus := 4,
-	Done := 5
-	
+	Production := 3,
+	Done := 4	
 );
 END_TYPE
 ]]></Declaration>

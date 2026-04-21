@@ -7,6 +7,8 @@ VAR_INPUT
 	bExecute : BOOL;
 	bHalt : BOOL;
 	rVel : REAL;
+	
+	eState : EFoerderband;
 END_VAR
 VAR_OUTPUT
 END_VAR
@@ -84,8 +86,8 @@ ELSIF NOT bEnable THEN
 	nState := 0;
 END_IF
 
-CASE nState OF
-	0: // OFF
+CASE eState OF
+	EFoerderband.Off: // OFF
 	
 		mcReset.Execute := FALSE;
 		mcPower.Enable := FALSE;
@@ -100,7 +102,7 @@ CASE nState OF
 			nState := 1;
 		END_IF
 	
-	1: //INIT
+	EFoerderband.init: //INIT
 		
 		mcPower.Enable := TRUE;
 		mcPower.Enable_Positive := FALSE;
@@ -112,7 +114,7 @@ CASE nState OF
 			nState :=2;
 		END_IF
 		
-	2: //Ready
+	EFoerderband.Ready: //Ready
 		mcPower.Enable := TRUE;
 		mcPower.Enable_Positive := FALSE;
 		mcReset.Execute := FALSE;
@@ -123,7 +125,7 @@ CASE nState OF
 			nState :=3;
 		END_IF
 	
-	3:// CNV an
+	EFoerderband.CNV_on:// CNV an
 		mcPower.Enable := TRUE;
 		mcPower.Enable_Positive := TRUE;
 		mcReset.Execute := FALSE;
@@ -134,7 +136,7 @@ CASE nState OF
 			nState :=4;
 		END_IF
 	
-	4: // CNV aus
+	EFoerderband.CNV_aus: // CNV aus
 		mcPower.Enable := TRUE;
 		mcPower.Enable_Positive := TRUE;
 		mcReset.Execute := FALSE;
@@ -145,7 +147,7 @@ CASE nState OF
 			nState :=5;
 		END_IF
 	
-	5: // DONE
+	EFoerderband.Done: // DONE
 		mcPower.Enable := TRUE;
 		mcPower.Enable_Positive := TRUE;
 		mcReset.Execute := FALSE;
@@ -156,7 +158,7 @@ CASE nState OF
 			nState :=2;
 		END_IF
 	
-	99: // ERROR 
+	EFoerderband.ErrorState: // ERROR 
 		mcPower.Enable := FALSE;
 		mcPower.Enable_Positive := FALSE;
 		mcReset.Execute := FALSE;
@@ -167,7 +169,7 @@ CASE nState OF
 			nState :=100;
 		END_IF
 	
-	100: // Resolve
+	EFoerderband.Resolve: // Resolve
 		mcPower.Enable := TRUE;
 		mcPower.Enable_Positive := TRUE;
 		mcReset.Execute := FALSE;

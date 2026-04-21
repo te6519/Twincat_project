@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Transport" Id="{8a83ff48-8412-4553-a9d0-6a6923f80fa3}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Transport
+VAR_INPUT
+	bSens1 : BOOL;
+	bSens2 : BOOL;
+	bSens3 : BOOL;
+	bSens4 : BOOL;
+	
+	bEnabale : BOOL;
+	bExecute : BOOL;
+	
+	nStation : INT;
+	
+	eState : ETransport;
+	
+	fSensStationMonitor : F_SensStationMonitor;
+	
+END_VAR
+VAR_OUTPUT
+	bHub1 : BOOL;
+	bHub2 : BOOL;
+	bHub3 : BOOL;
+END_VAR
+VAR
+	fbCNV : FB_CNV;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT bEnable THEN
+	eState := ETransport.Off;
+END_IF
+
+CASE eState OF
+	
+	ETransport.Off:
+		fbCNV.bEnable := FALSE;
+		fbCNV.bExecute := FALSE;
+		fbCNV.bHalt := FALSE;
+		bHub1 := FALSE;
+		bHub2 := FALSE;
+		bHub3 := FALSE;
+		
+		IF bEnable THEN
+			eState := ETransport.Init;
+		END_IF
+		
+	ETransport.Init:
+		fbCNV.bEnable := TRUE;
+		fbCNV.bExecute := FALSE;
+		fbCNV.bHalt := FALSE;
+		bHub1 := FALSE;
+		bHub2 := FALSE;
+		bHub3 := FALSE;
+		
+		IF NOT (bSens1 AND bSens2 AND bSens3) AND fbCNV.eState = EFoerderband.Ready THEN
+			eState := ETransport.Ready;
+		END_IF
+		
+	ETransport.Ready:
+		fbCNV.bEnable := TRUE;
+		fbCNV.bExecute := FALSE;
+		fbCNV.bHalt := FALSE;
+		bHub1 := FALSE;
+		bHub2 := FALSE;
+		bHub3 := FALSE;
+		
+		IF bExecute THEN
+			eState := eTransport.Production;
+		END_IF
+		
+	ETransport.Production:
+		fbCNV.bEnable := TRUE;
+		fbCNV.bExecute := TRUE;
+		fbCNV.bHalt := FALSE;
+		bHub1 := FALSE;
+		bHub2 := FALSE;
+		bHub3 := FALSE;
+		
+		CASE nStation OF
+			1:
+				bHub1 := FALSE;
+				bHub2 := FALSE;
+				bHub3 := FALSE;
+			2: 
+				bHub1 := TRUE;
+				bHub2 := FALSE;
+				bHub3 := FALSE;
+			3: 
+				bHub1 := FALSE;
+				bHub2 := TRUE;
+				bHub3 := FALSE;
+			4:
+				bHub1 := FALSE;
+				bHub2 := FALSE;
+				bHub3 := TRUE;
+		END_CASE
+	
+		IF fSensStationMonitor = TRUE THEN
+			eState := ETransport.Producing;
+		END_IF
+	
+	ETransport.Producing:
+		fbCNV.bEnable := TRUE;
+		fbCNV.bExecute := FALSE;
+		fbCNV.bHalt := TRUE;
+		bHub1 := FALSE;
+		bHub2 := FALSE;
+		bHub3 := FALSE;
+		
+		IF fbCNV.eState = EFoerderband.Done THEN
+			eState := ETransport.Done;
+		END_IF
+	
+	ETransport.Done:
+		fbCNV.bEnable := TRUE;
+		fbCNV.bExecute := FALSE;
+		fbCNV.bHalt := FALSE;
+		bHub1 := FALSE;
+		bHub2 := FALSE;
+		bHub3 := FALSE;
+		
+		IF NOT bExecute THEN
+			eState := ETransport.Ready;
+		END_IF
+
+END_CASE]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

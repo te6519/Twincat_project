@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Dispenser" Id="{69835d49-650a-4d96-b161-fd36406bf87d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Dispenser
+VAR_INPUT
+	bSens1 : BOOL;
+	bSens2 : BOOL;
+	bSens3 : BOOL;
+	
+	bEnable : BOOL;
+	bExecute : BOOL;
+	
+END_VAR
+VAR_OUTPUT
+	Schnecke1 : BOOL;
+	Schnecke2 : BOOL;
+	Schnecke3 : BOOL;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Schnecke1 := FALSE;
+Schnecke2 := FALSE;
+Schnecke3 := FALSE;
+
+IF bSens1 AND bEnable AND bExecute THEN
+	Schnecke1 := TRUE;
+	
+ELSIF bSens2 AND bEnable AND bExecute THEN
+	Schnecke2 := TRUE;
+	
+ELSIF bSens3 AND bEnable AND bExecute THEN
+	Schnecke3 := TRUE;
+	
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

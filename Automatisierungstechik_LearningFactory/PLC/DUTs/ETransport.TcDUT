@@ -1,20 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
-  <DUT Name="EFoerderband" Id="{febd0df0-1fd4-4009-9c68-79c2893b4396}">
+  <DUT Name="ETransport" Id="{250f902b-59c7-4f97-a9b8-082e176b5988}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
 {attribute 'to_string'}
-TYPE EFoerderband :
+TYPE ETransport :
 (
 	Off:=0,
-	init := 1,
-	ErrorState := 99,
-	Resolve := 100,
+	Init := 1,
 	Ready := 2,
-	CNV_on := 3,
-	CNV_aus := 4,
+	Production := 3,
+	Producing := 4,
 	Done := 5
-	
 );
 END_TYPE
 ]]></Declaration>

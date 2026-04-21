@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Abfuellmodul" Id="{e67bacc1-3b74-41e4-be6c-73abb8fb4723}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Abfuellmodul
+VAR_INPUT
+	bEnable : BOOL;
+	bExecute : BOOL;
+END_VAR
+VAR_OUTPUT
+	eState : EAnlageGes;
+END_VAR
+VAR
+	fbTransport : FB_Transport;
+	fbDispenser : FB_Dispenser;
+	nState : INT;
+	eState : INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -31,7 +31,7 @@
     <Compile Include="POUs\Extruder\FB_System_Fullstand.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\Förderband\FB_System_CNV.TcPOU">
+    <Compile Include="POUs\FB_System_CNV.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\MAIN.TcPOU">
@@ -54,7 +54,6 @@
   <ItemGroup>
     <Folder Include="DUTs" />
     <Folder Include="GVLs" />
-    <Folder Include="POUs\Förderband" />
     <Folder Include="POUs\Extruder" />
     <Folder Include="POUs\Vereinzelung" />
     <Folder Include="VISUs" />

@@ -11,10 +11,10 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	rPcntFillLevel : REAL;
-	rFilling1Alt : REAL;
-	rFilling2Alt : REAL;
-	rFilling3Alt : REAL;
+	rPcntFillLevel : LREAL;
+	rFilling1Alt : LREAL;
+	rFilling2Alt : LREAL;
+	rFilling3Alt : LREAL;
 	iFillLevel1 : UINT;
 	iFillLevel2 : UINT;
 	iFillLevel3 : UINT;

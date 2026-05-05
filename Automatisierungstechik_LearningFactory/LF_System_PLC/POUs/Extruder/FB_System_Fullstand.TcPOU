@@ -10,7 +10,7 @@ VAR_OUTPUT
 	iOut : UINT; // Fullstandssignal
 END_VAR
 VAR
-	rPcntFillLevel : REAL := 50; // Fullstand in Prozent
+	rPcntFillLevel : LREAL := 50.0; // Fullstand in Prozent
 	iFillLevel : UINT;
 	fPosExtAlt : LREAL;
 	NotMoving : Bool;

@@ -1,0 +1,28 @@
+Umbau auf nState (INT) statt ENUMs
+==================================
+
+Geaendert wurde das PLC-Projekt unter:
+Automatisierungstechik_LearningFactory/PLC
+
+Wichtigste Aenderungen:
+1. Die bisherigen DUT-ENUMs ETransport, EFoerderband, EAnlageGes und EAnlagenStatus wurden aus dem PLC-Projekt entfernt.
+2. Neue Datei: PLC/GVLs/GVL_States.TcGVL
+   Dort liegen nur noch INT-Konstanten, z.B. ST_OFF, CNV_READY, TR_PRODUCTION.
+3. Jeder Funktionsbaustein hat weiterhin seinen eigenen nState.
+   Es gibt also keinen gemeinsamen globalen Zustandswert, nur globale Konstanten.
+4. FB_CNV:
+   eState wurde entfernt. nState ist jetzt VAR_OUTPUT, damit andere Bausteine den Zustand lesen koennen.
+5. FB_Transport:
+   eState wurde entfernt. Der Baustein nutzt jetzt nState und TR_... Konstanten.
+   Der Tippfehler bEnabale wurde zu bEnable korrigiert.
+6. FB_Vereinzelung:
+   eStatus wurde durch nState ersetzt.
+7. FB_StatusLight:
+   eStatus-Eingang wurde durch nState ersetzt.
+8. MAIN:
+   eStatus wurde durch nStateVereinzelung ersetzt und an FB_StatusLight weitergegeben.
+9. FB_Abfuellmodul:
+   eState-Ausgang wurde durch nState ersetzt.
+
+Hinweis:
+Ich konnte hier keinen TwinCAT-Compiler ausfuehren. Die XML-Dateien wurden auf gueltige XML-Struktur geprueft und alle direkten ENUM/eState/eStatus-Verweise wurden entfernt.

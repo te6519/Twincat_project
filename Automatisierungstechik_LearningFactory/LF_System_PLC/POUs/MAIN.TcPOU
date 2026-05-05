@@ -52,6 +52,8 @@ VAR
 	bRefill1 : BOOL;
 	bRefill2 : BOOL;
 	bRefill3 : BOOL;
+	bBottleDropped : BOOL;
+	bBottleLeft : BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -63,25 +65,25 @@ END_VAR
 	bNS1=> bOut_VereinzelungNS1, 
 	bNS2=> bOut_VereinzelungNS2, 
 	bNS3=> bOut_VereinzelungNS3,
-	bBottleDropped => );
+	bBottleDropped => bBottleDropped);
 	
 fbCNV(
 	fPos:= fIN_CnvPos, 
 	bStopper1:= bIN_Stopper1, 
 	bStopper2:= bIN_Stopper2, 
 	bStopper3:= bIN_Stopper3, 
-	bBottleDropped := fbVereinzelung.bBottleDropped , 
+	bBottleDropped := bBottleDropped , 
 	bNS1=> bOut_CnvNS1 , 
 	bNS2=> bOut_CnvNS2 , 
 	bNS3=> bOut_CnvNS3 , 
 	bNS4=> bOut_CnvNS4,
-	bBottleLeft => );
+	bBottleLeft => bBottleLeft);
 	
 fbExt1(bRefill:=bRefill1 , fPosExt:= fIN_ExtPos1, iOut=> iOut_USS1 );
 fbExt2(bRefill:=bRefill2 , fPosExt:= fIN_ExtPos2, iOut=> iOut_USS2 );
 fbExt3(bRefill:=bRefill3 , fPosExt:= fIN_ExtPos3, iOut=> iOut_USS3 );
 
-fbBottleLevel(rFilling1 := fIN_ExtPos1, rFilling2 := fIN_ExtPos2 ,rFilling3 := fIN_ExtPos3,Reset:= fbCNV.bBottleDropped );]]></ST>
+fbBottleLevel(rFilling1 := fIN_ExtPos1, rFilling2 := fIN_ExtPos2 ,rFilling3 := fIN_ExtPos3,Reset:= bBottleLeft );]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

@@ -23,6 +23,3 @@ Wichtigste Aenderungen:
    eStatus wurde durch nStateVereinzelung ersetzt und an FB_StatusLight weitergegeben.
 9. FB_Abfuellmodul:
    eState-Ausgang wurde durch nState ersetzt.
-
-Hinweis:
-Ich konnte hier keinen TwinCAT-Compiler ausfuehren. Die XML-Dateien wurden auf gueltige XML-Struktur geprueft und alle direkten ENUM/eState/eStatus-Verweise wurden entfernt.

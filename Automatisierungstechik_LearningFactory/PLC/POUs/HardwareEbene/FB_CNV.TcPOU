@@ -84,7 +84,7 @@ ax.ReadStatus();
 
 bStop := ifc_HW.bStop;
 IF bStop THEN
-	nState := 80;
+	nState := 80; //Stop CNV
 END_IF
 
 IF ax.Status.Error THEN 
@@ -92,6 +92,19 @@ IF ax.Status.Error THEN
 ELSIF NOT bEnable THEN 
 	nState := 0;
 END_IF
+
+mcStop(
+	Axis:= ax, 
+	Execute:= , 
+	Deceleration:= , 
+	Jerk:= , 
+	Options:= , 
+	Done=> , 
+	Busy=> , 
+	Active=> , 
+	CommandAborted=> , 
+	Error=> , 
+	ErrorID=> );
 
 CASE eState OF
 	EFoerderband.Off: // OFF
@@ -175,16 +188,21 @@ CASE eState OF
 		IF bEnable THEN 
 			nState :=100;
 		END_IF
+	
 	80: //Stop CNV
 	mcVelocity.Execute := FALSE;
 	mcHalt.Execute := FALSE;
 	mcStop.Execute := TRUE;
 	
+	IF mcStop.Done AND NOT bStop THEN
+		nState := 81;
+	END_IF
+	
 	81: //RE-INIT //noch überarbeiten mit e state und 
 	mcVelocity.Execute := FALSE;
 	mcHalt.Execute := FALSE;
 	mcStop.Execute := FALSE;
-	mcReset //auch noch setzen 
+	mcReset.Execute := TRUE; 
 	
 	
 	EFoerderband.Resolve: // Resolve
@@ -195,7 +213,7 @@ CASE eState OF
 		mcHalt.Execute := FALSE;
 	
 	IF mcReset.Done THEN 
-			nState :=1;
+			nState :=3;
 		END_IF
 END_CASE]]></ST>
     </Implementation>

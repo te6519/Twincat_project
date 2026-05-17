@@ -26,6 +26,7 @@ VAR
 	nState : INT := 0;
 	fbTO_Transport : FB_TimeOutError(9001,T#10S);
 	bStop : BOOL;
+	E_State: INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -37,12 +38,14 @@ END_VAR
 	eState:= , 
 	ax:= );
 
+
+
 fbTO_Transport(
-	bIN:= eState, 
-	bZiel:= , 
+	bIN:= eState = E_State.Production, 
+	bZiel:= eState = E_State.Done, 
 	bReset:= , 
-	bError=> , 
-	ErrorID=> );
+	bError=> bError,
+	ErrorID=> ErrorID);
 	
 	
 bStop := ifc_HW.bStop;
@@ -51,100 +54,104 @@ IF NOT bEnable THEN
 	eState := ETransport.Off;
 END_IF
 
-CASE eState OF
 	
-	ETransport.Off:
-		fbCNV.bEnable := FALSE;
-		fbCNV.bExecute := FALSE;
-		fbCNV.bHalt := FALSE;
-		bHub1 := FALSE;
-		bHub2 := FALSE;
-		bHub3 := FALSE;
+IF NOT bStop THEN	
+	CASE eState OF
 		
-		IF bEnable THEN
-			eState := ETransport.Init;
-		END_IF
+		ETransport.Off:
+			fbCNV.bEnable := FALSE;
+			fbCNV.bExecute := FALSE;
+			fbCNV.bHalt := FALSE;
+			bHub1 := FALSE;
+			bHub2 := FALSE;
+			bHub3 := FALSE;
+			
+			IF bEnable THEN
+				eState := ETransport.Init;
+			END_IF
+			
+		ETransport.Init:
+			fbCNV.bEnable := TRUE;
+			fbCNV.bExecute := FALSE;
+			fbCNV.bHalt := FALSE;
+			bHub1 := FALSE;
+			bHub2 := FALSE;
+			bHub3 := FALSE;
+			
+			IF NOT (bSens1 AND bSens2 AND bSens3) AND fbCNV.eState = EFoerderband.Ready THEN
+				eState := ETransport.Ready;
+			END_IF
+			
+		ETransport.Ready:
+			fbCNV.bEnable := TRUE;
+			fbCNV.bExecute := FALSE;
+			fbCNV.bHalt := FALSE;
+			bHub1 := FALSE;
+			bHub2 := FALSE;
+			bHub3 := FALSE;
+			
+			IF bExecute THEN
+				eState := eTransport.Production;
+			END_IF
+			
+		ETransport.Production:
+			fbCNV.bEnable := TRUE;
+			fbCNV.bExecute := TRUE;
+			fbCNV.bHalt := FALSE;
+			bHub1 := FALSE;
+			bHub2 := FALSE;
+			bHub3 := FALSE;
+			
+			CASE nStation OF
+				1:
+					bHub1 := FALSE;
+					bHub2 := FALSE;
+					bHub3 := FALSE;
+				2: 
+					bHub1 := TRUE;
+					bHub2 := FALSE;
+					bHub3 := FALSE;
+				3: 
+					bHub1 := FALSE;
+					bHub2 := TRUE;
+					bHub3 := FALSE;
+				4:
+					bHub1 := FALSE;
+					bHub2 := FALSE;
+					bHub3 := TRUE;
+			END_CASE
 		
-	ETransport.Init:
-		fbCNV.bEnable := TRUE;
-		fbCNV.bExecute := FALSE;
-		fbCNV.bHalt := FALSE;
-		bHub1 := FALSE;
-		bHub2 := FALSE;
-		bHub3 := FALSE;
+			IF fSensStationMonitor = TRUE THEN
+				eState := ETransport.Producing;
+			END_IF
 		
-		IF NOT (bSens1 AND bSens2 AND bSens3) AND fbCNV.eState = EFoerderband.Ready THEN
-			eState := ETransport.Ready;
-		END_IF
+		ETransport.Producing:
+			fbCNV.bEnable := TRUE;
+			fbCNV.bExecute := FALSE;
+			fbCNV.bHalt := TRUE;
+			bHub1 := FALSE;
+			bHub2 := FALSE;
+			bHub3 := FALSE;
+			
+			IF fbCNV.eState = EFoerderband.Done THEN
+				eState := ETransport.Done;
+			END_IF
 		
-	ETransport.Ready:
-		fbCNV.bEnable := TRUE;
-		fbCNV.bExecute := FALSE;
-		fbCNV.bHalt := FALSE;
-		bHub1 := FALSE;
-		bHub2 := FALSE;
-		bHub3 := FALSE;
-		
-		IF bExecute THEN
-			eState := eTransport.Production;
-		END_IF
-		
-	ETransport.Production:
-		fbCNV.bEnable := TRUE;
-		fbCNV.bExecute := TRUE;
-		fbCNV.bHalt := FALSE;
-		bHub1 := FALSE;
-		bHub2 := FALSE;
-		bHub3 := FALSE;
-		
-		CASE nStation OF
-			1:
-				bHub1 := FALSE;
-				bHub2 := FALSE;
-				bHub3 := FALSE;
-			2: 
-				bHub1 := TRUE;
-				bHub2 := FALSE;
-				bHub3 := FALSE;
-			3: 
-				bHub1 := FALSE;
-				bHub2 := TRUE;
-				bHub3 := FALSE;
-			4:
-				bHub1 := FALSE;
-				bHub2 := FALSE;
-				bHub3 := TRUE;
-		END_CASE
+		ETransport.Done:
+			fbCNV.bEnable := TRUE;
+			fbCNV.bExecute := FALSE;
+			fbCNV.bHalt := FALSE;
+			bHub1 := FALSE;
+			bHub2 := FALSE;
+			bHub3 := FALSE;
+			
+			IF NOT bExecute THEN
+				eState := ETransport.Ready;
+			END_IF
 	
-		IF fSensStationMonitor = TRUE THEN
-			eState := ETransport.Producing;
-		END_IF
-	
-	ETransport.Producing:
-		fbCNV.bEnable := TRUE;
-		fbCNV.bExecute := FALSE;
-		fbCNV.bHalt := TRUE;
-		bHub1 := FALSE;
-		bHub2 := FALSE;
-		bHub3 := FALSE;
-		
-		IF fbCNV.eState = EFoerderband.Done THEN
-			eState := ETransport.Done;
-		END_IF
-	
-	ETransport.Done:
-		fbCNV.bEnable := TRUE;
-		fbCNV.bExecute := FALSE;
-		fbCNV.bHalt := FALSE;
-		bHub1 := FALSE;
-		bHub2 := FALSE;
-		bHub3 := FALSE;
-		
-		IF NOT bExecute THEN
-			eState := ETransport.Ready;
-		END_IF
-
-END_CASE]]></ST>
+	END_CASE
+END_IF
+]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

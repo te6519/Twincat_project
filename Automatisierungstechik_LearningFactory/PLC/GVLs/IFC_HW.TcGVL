@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1">
   <GVL Name="IFC_HW" Id="{6d93a28a-bcbe-4118-afde-16fb93b1555f}">
     <Declaration><![CDATA[// In dieser GVL werden alle Variablen deklariert die auf die realen Klemmen zugreifen
 VAR_GLOBAL
@@ -8,6 +8,7 @@ VAR_GLOBAL
 		bEnable		AT%I*	: BOOL;			// Enable Factory (HMI Production Umgebung)
 		bExecute	AT%I*	: BOOL;			// Startsignal	(Start Knopf Konsole)
 		bStop				: BOOL;			// Stop Variable (interne Variable um FB's zu stoppen)
+		bReset				: BOOL;			// Reset Variable
 		
 	// Station Statusampel	
 		bAmpelRot 	AT%Q* 	: BOOL;			// Signal-LED Rot

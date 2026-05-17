@@ -23,9 +23,13 @@ VAR
 	fbBlink : FB_StatusLight;
 	fbCNV : FB_CNV;
 	fbEndXmin : FB_DigitalInput(TRUE);
+	fbAbfuellmodul : FB_Abfuellmodul;
 	
 	eStatus : EAnlagenStatus;
 	nDoneCounter : INT;
+	bError : BOOL;
+	ErrorID : DWORD;
+	bReset : BOOL;
 	
 	
 	
@@ -67,9 +71,25 @@ fbRctrl(
 	bGate2Auf=> IFC_HW.bR1AKT2, 
 	bGate2Zu=> IFC_HW.bR2AKT2);
 
+fbAbfuellmodul(
+	bEnable:= , 
+	bExecute:= , 
+	eState=> , 
+	bError=> bError, 
+	ErrorID=> ErrorID);
+
 fbBlink(eStatus:= eStatus, bRed=> IFC_HW.bAmpelRot, bGreen=> IFC_HW.bAmpelGrun, bYellow=> IFC_HW.bAmpelGelb);
 
+IF bError AND (ErrorID = 9001 OR ErrorID = 9003) THEN
+	ifc_HW.bstop := TRUE;
+END_IF
 
+ifc_HW.bReset := bReset;
+	
+IF breset AND NOT bError THEN
+	ifc_HW.bStop := FALSE;
+	breset := FALSE;
+END_IF
 (*
 //OUT
 IFC_HW.bAmpelRot := bRed;

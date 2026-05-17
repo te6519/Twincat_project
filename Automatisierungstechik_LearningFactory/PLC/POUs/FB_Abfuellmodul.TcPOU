@@ -8,16 +8,44 @@ VAR_INPUT
 END_VAR
 VAR_OUTPUT
 	eState : EAnlageGes;
+	bError : BOOL;
+	ErrorID : DWORD;
 END_VAR
 VAR
 	fbTransport : FB_Transport;
 	fbDispenser : FB_Dispenser;
 	nState : INT;
-	eState : INT;
+	bStop : BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[]]></ST>
+      <ST><![CDATA[fbTransport(
+	bSens1:= , 
+	bSens2:= , 
+	bSens3:= , 
+	bSens4:= , 
+	bEnabale:= , 
+	bExecute:= , 
+	nStation:= , 
+	eState:= , 
+	fSensStationMonitor:= , 
+	bHub1=> , 
+	bHub2=> , 
+	bHub3=> , 
+	bError=> bError, 
+	ErrorID=> ErrorID);
+	
+	bStop := ifc_HW.bStop;
+	
+	IF NOT bEnable THEN
+		//noch auszuarbeiten
+	END_IF
+	
+	IF NOT bStop THEN
+		CASE nState OF
+			//noch auszuarbeiten
+		END_CASE
+	END_IF]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

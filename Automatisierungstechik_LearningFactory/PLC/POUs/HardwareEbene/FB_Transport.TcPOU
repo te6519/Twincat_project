@@ -7,14 +7,10 @@ VAR_INPUT
 	bSens2 : BOOL;
 	bSens3 : BOOL;
 	bSens4 : BOOL;
-	
 	bEnabale : BOOL;
 	bExecute : BOOL;
-	
 	nStation : INT;
-	
 	eState : ETransport;
-	
 	fSensStationMonitor : F_SensStationMonitor;
 	
 END_VAR
@@ -22,13 +18,36 @@ VAR_OUTPUT
 	bHub1 : BOOL;
 	bHub2 : BOOL;
 	bHub3 : BOOL;
+	bError: BOOL;
+	ErrorID : DWORD;
 END_VAR
 VAR
 	fbCNV : FB_CNV;
+	nState : INT := 0;
+	fbTO_Transport : FB_TimeOutError(9001,T#10S);
+	bStop : BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF NOT bEnable THEN
+      <ST><![CDATA[fbCNV(
+	bEnable:= , 
+	bExecute:= , 
+	bHalt:= , 
+	rVel:= , 
+	eState:= , 
+	ax:= );
+
+fbTO_Transport(
+	bIN:= eState, 
+	bZiel:= , 
+	bReset:= , 
+	bError=> , 
+	ErrorID=> );
+	
+	
+bStop := ifc_HW.bStop;
+
+IF NOT bEnable THEN
 	eState := ETransport.Off;
 END_IF
 

@@ -19,6 +19,8 @@ VAR
 	mcVelocity : MC_MoveVelocity;
 	mcHalt : MC_Halt;
 	ErrorID: INT;
+	bStop : Bool;
+	mcStop: MC_Stop;
 END_VAR
 
 VAR_IN_OUT 
@@ -79,6 +81,11 @@ mcVelocity(
 	ErrorID=> );
 
 ax.ReadStatus();
+
+bStop := ifc_HW.bStop;
+IF bStop THEN
+	nState := 80;
+END_IF
 
 IF ax.Status.Error THEN 
 	nState := 99;
@@ -168,6 +175,17 @@ CASE eState OF
 		IF bEnable THEN 
 			nState :=100;
 		END_IF
+	80: //Stop CNV
+	mcVelocity.Execute := FALSE;
+	mcHalt.Execute := FALSE;
+	mcStop.Execute := TRUE;
+	
+	81: //RE-INIT //noch überarbeiten mit e state und 
+	mcVelocity.Execute := FALSE;
+	mcHalt.Execute := FALSE;
+	mcStop.Execute := FALSE;
+	mcReset //auch noch setzen 
+	
 	
 	EFoerderband.Resolve: // Resolve
 		mcPower.Enable := TRUE;

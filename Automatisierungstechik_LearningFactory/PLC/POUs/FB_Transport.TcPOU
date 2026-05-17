@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Transport" Id="{eef083c8-6ee7-4e91-bcb5-231fbd342ad0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Transport
+VAR_INPUT
+	bSens1 : BOOL;
+	bSens2 : BOOL;
+	bSens3 : BOOL;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

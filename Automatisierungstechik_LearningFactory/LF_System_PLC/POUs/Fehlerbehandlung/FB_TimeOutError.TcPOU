@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_TimeOutError" Id="{6faff8c1-1212-44ba-836b-16298e9654ed}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TimeOutError
+VAR_INPUT
+	bIN : BOOL;
+	bZiel : BOOL;
+	bReset : BOOL;
+END_VAR
+VAR_OUTPUT
+	bError : BOOL;
+	ErrorID : DWORD;
+END_VAR
+VAR
+	timer : Ton;
+	_ErrorID : DWORD;
+	_PT : TIME;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[timer(IN:= , PT:= _PT, Q=> , ET=> );
+
+IF bIN THEN
+	timer.IN := TRUE;
+END_IF
+
+IF bZiel THEN
+	timer.IN := FALSE;
+END_IF
+
+IF timer.Q THEN
+	bError := TRUE;
+	ErrorID := _ErrorID;
+ELSIF NOT timer.Q OR bReset THEN
+	bError := FALSE;
+	ErrorID := 0;
+END_IF ]]></ST>
+    </Implementation>
+    <Method Name="FB_Init" Id="{51c45d57-1eb2-4889-963f-c25eb14c8fa7}">
+      <Declaration><![CDATA[//FB_Init is always available implicitly and it is used primarily for initialization.
+//The return value is not evaluated. For a specific influence, you can also declare the
+//methods explicitly and provide additional code there with the standard initialization
+//code. You can evaluate the return value.
+METHOD FB_Init: BOOL
+VAR_INPUT
+    bInitRetains: BOOL; // TRUE: the retain variables are initialized (reset warm / reset cold)
+    bInCopyCode: BOOL;  // TRUE: the instance will be copied to the copy code afterward (online change)  
+	ErrorID : DWORD; 
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>
